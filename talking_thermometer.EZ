@@ -1,0 +1,185 @@
+
+; talking_thermometer.EZ
+; Foxonix / Metre Ideas and Design
+; www.foxonix.com
+
+; Program: Will Sakran
+; Created: 09.05.14
+; Public - Modify and share this program as you wish.
+
+; Modified 09.21.15
+; 	Moving inputs from ports P1 and P2 to ports P2 and P6. The Arduino's
+; 	serial communication conflicts with Foxonix pins P0.0 and P0.1, so
+;	if we want to use the Serial Monitor to debug the Arduino, we need
+;	to make sure P1.0 and P1.1 are free. 
+
+; Program description
+;	This program reads two input ports and stores the values in two registers.
+;	Those values are then decoded and used call specific labels in the program.
+;	Two ports is 8 bits, so we can decode up to 256 different labels. This
+;	program contains audio to say temperatures between 40 and 109 degrees.
+
+; Hardware INPUTS
+	; Port P2 - ones place temperature code from the Arduino
+	; Port P6 - tens place temperature code from the Arduino
+	; Pin P0.2 - this pin gets triggered when a temperature is ready.
+
+; Hardware OUTPUTS
+	; Speaker attached to PWM output
+
+; Set the device name
+[device]
+SNC21120
+
+
+; Specify the number of pins declared in [input_states]
+[key]
+direct=3
+
+
+; List WAV files to be included in the program
+[files]
+the_temperature_is_12k.wav
+
+forty_12k.wav
+fifty_12k.wav
+sixty_12k.wav
+seventy_12k.wav
+eighty_12k.wav
+ninety_12k.wav
+one_hundred_12k.wav
+and_12k.wav
+
+one_12k.wav
+two_12k.wav
+three_12k.wav
+four_12k.wav
+five_12k.wav
+six_12k.wav
+seven_12k.wav
+eight_12k.wav
+nine_12k.wav
+
+degrees_12k.wav
+
+
+; Define the various input states for the program.
+; This describes which pins will have buttons, switches, or
+; other inputs attached to them, and defines when those
+; inputs will be active and inactive. At least one input
+; state must be defined even if it is not used.
+[input_states]
+; PIN		P1.0	P1.1    P1.2
+locked_out:	x	x	x
+
+		; the "read" label will be called when P1.2 goes high.
+enabled:	x	x	read
+
+
+; Define the routines (paths) that the program will use.
+; The init path is always called first on power up and reset.
+[paths]
+init:
+	& locked_out		; ignore inputs during init
+	& ppdac			; set the audio output for PWM
+	& freq=12k		; set sample playback rate to 12 kHz
+	& enabled		; enable the inputs
+	& end			; stop the program and enter low power mode
+
+read:
+	& delay(0.100)		; wait 100 ms to make sure all inputs have settled
+	& M1=P6			; read P6 (tens place) and store value in M1
+	& M0=P2			; read P2 (ones place) and store value in M0
+	& the_temperature_is_12k.wav
+
+	; decode the tens place bits and jump to the corresponding label
+	& M1:[zeros tens twenty thirty forty fifty sixty seventy eighty ninety onehundred]
+
+
+zeros:
+	& end		; no audio phrase for zeros
+
+tens:
+	& end		; no audio phrase for tens (or teens)
+
+twenty:
+	& end		; no audio phrase for twenty
+
+thirty:
+	& end		; no audio phrase for thirty
+	
+forty:
+	& forty_12k.wav
+	& decode_ones
+
+fifty:
+	& fifty_12k.wav
+	& decode_ones
+
+sixty:
+	& sixty_12k.wav
+	& decode_ones
+
+seventy:
+	& seventy_12k.wav
+	& decode_ones
+
+eighty:
+	& eighty_12k.wav
+	& decode_ones
+
+ninety:
+	& ninety_12k.wav
+	& decode_ones
+
+onehundred:
+	& one_hundred_12k.wav
+	& M0?0:degrees			; if exactly 100 degrees, skip "and"
+	& and_12k.wav
+	& decode_ones
+
+
+; now decode the ones place bits and jump to the corresponding label
+decode_ones:
+	& M0:[degrees one two three four five six seven eight nine]
+
+one:
+	& one_12k.wav
+	& degrees
+
+two:
+	& two_12k.wav
+	& degrees
+
+three:
+	& three_12k.wav
+	& degrees
+
+four:
+	& four_12k.wav
+	& degrees
+
+five:
+	& five_12k.wav
+	& degrees
+
+six:
+	& six_12k.wav
+	& degrees
+
+seven:
+	& seven_12k.wav
+	& degrees
+
+eight:
+	& eight_12k.wav
+	& degrees
+
+nine:
+	& nine_12k.wav
+	& degrees
+
+degrees:
+	& degrees_12k.wav
+	& end
+
