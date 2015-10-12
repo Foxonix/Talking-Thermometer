@@ -15,7 +15,7 @@
 
 ; Program description
 ;	This program reads two input ports and stores the values in two registers.
-;	Those values are then decoded and used call specific labels in the program.
+;	Those values are then decoded and used to call specific labels in the program.
 ;	Two ports is 8 bits, so we can decode up to 256 different labels. This
 ;	program contains audio to say temperatures between 40 and 109 degrees.
 
