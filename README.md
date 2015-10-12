@@ -22,3 +22,7 @@ Pin P0.2 - this pin gets triggered when a temperature is ready.
 
 Hardware OUTPUTS  
 Speaker attached to PWM output
+
+Hook-up Diagram  
+[https://github.com/Foxonix/Talking-Thermometer/blob/master/Fox_Diagram_Talking_Thermometer_bb.jpg]  
+Or use a Foxonix Arduino Shield
